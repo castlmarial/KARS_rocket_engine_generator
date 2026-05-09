@@ -147,7 +147,7 @@ if run_button:
     st.markdown("---")
     st.subheader("📤 Export Comprehensive Data")
 
-    # A. 설계 입력 파라미터 데이터프레임 (누락된 항목 보강)
+    # A. 설계 입력 파라미터 데이터프레임
     df_inputs = pd.DataFrame({
         "Category": ["Target", "Propellant", "Propellant", "Rocket", "Rocket", "Rocket", "Engine", "Engine", "Engine", "Engine", "Engine", "Engine", "Nozzle", "Nozzle", "Geometry", "Geometry"],
         "Parameter": ["Target Altitude", "Density", "C*", "Initial Mass", "Propellant Mass", "CD_A", "Burn Time", "Specific Heat Ratio", "Expansion Ratio", "Max Target Pressure", "Avg to Max P Ratio", "Efficiency", "Divergence Half Angle", "Convergence Half Angle", "Chamber ID", "Liner Thickness"],
@@ -155,12 +155,35 @@ if run_button:
         "Unit": ["m", "kg/m³", "m/s", "kg", "kg", "m²", "s", "-", "-", "Pa", "%", "-", "deg", "deg", "mm", "mm"]
     })
 
-    # B. 결과값 데이터프레임
-    df_results = pd.DataFrame({
-        "Category": ["Requirement", "Requirement", "Requirement", "Requirement", "Nozzle", "Nozzle", "Nozzle", "Nozzle", "Nozzle", "Grain", "Grain", "Grain", "Grain", "Simulation", "Simulation", "Simulation", "Simulation", "Simulation", "Simulation"],
-        "Metric": ["Avg Thrust", "Total Impulse", "Target Isp", "Target Pc (bar)", "Throat Diameter", "Exit Diameter", "Div Half Angle", "Conv Half Angle", "Nozzle Efficiency", "Grain Outer Dia", "Grain Core Dia", "Grain Length", "Grain Density", "Peak Altitude", "Max Velocity", "Sim Avg Thrust", "Sim Impulse", "Sim Isp", "Sim Peak Pressure"],
-        "Value": [F_req, req_impulse, isp_target, design.P0 / 1e5, nozzle_res['Dt']*1000, nozzle_res['De']*1000, alpha_div, beta_conv, design.efficiency*100, grain_res['D_grain_mm'], grain_res['d_core_mm'], grain_res['L_grain_mm'], prop.density, h_max, v_max, sim_impulse/grain_res['sim_time'][-1], sim_impulse, sim_isp, grain_res['sim_max_pressure_bar']],
-        "Unit": ["N", "N·s", "s", "bar", "mm", "mm", "deg", "deg", "%", "mm", "mm", "mm", "kg/m³", "m", "m/s", "N", "N·s", "s", "bar"]
+    # B. 출력값 데이터프레임
+    df_output = pd.DataFrame({
+        "Metric": [
+            "Avg Thrust", "Total Impulse", "Target Isp",
+            "Sim Avg Thrust", "Sim Impulse", "Sim Isp",
+            "Peak Pressure", "Avg Pressure",
+            "Nozzle Throat", "Nozzle Exit",
+            "Div Angle", "Conv Angle", "Nozzle Efficiency",
+            "Grain Outer Diameter", "Grain Core Diameter", "Grain Length", "Grain Density",
+            "Maximum Altitude", "Maximum Velocity"
+        ],
+        "Value": [
+            F_req, req_impulse, isp_target,
+            sim_impulse/grain_res['sim_time'][-1], sim_impulse, sim_isp,
+            grain_res['sim_max_pressure_bar'], grain_res['sim_avg_pressure_bar'],
+            nozzle_res['Dt']*1000, nozzle_res['De']*1000,
+            alpha_div, beta_conv, design.efficiency*100,
+            grain_res['D_grain_mm'], grain_res['d_core_mm'], grain_res['L_grain_mm'], prop.density,
+            h_max, v_max
+        ],
+        "Unit": [
+            "N", "N·s", "s",
+            "N", "N·s", "s",
+            "bar", "bar",
+            "mm", "mm",
+            "deg", "deg", "%",
+            "mm", "mm", "mm", "kg/m³",
+            "m", "m/s"
+        ]
     })
 
     # C. 시계열 데이터
@@ -173,7 +196,7 @@ if run_button:
     excel_buffer = io.BytesIO()
     with pd.ExcelWriter(excel_buffer, engine='xlsxwriter') as writer:
         df_inputs.to_excel(writer, sheet_name='Design_Inputs', index=False)
-        df_results.to_excel(writer, sheet_name='Design_Specifications', index=False)
+        df_output.to_excel(writer, sheet_name='Output_Data', index=False)
         df_series.to_excel(writer, sheet_name='Raw_Time_Series', index=False)
     
     st.download_button(
