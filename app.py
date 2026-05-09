@@ -10,8 +10,69 @@ from config import Propellant, RocketSpec, EngineDesign, G0
 from engine import SolidMotor
 from flight import RocketFlightSim, FlightOptimizer
 
-st.set_page_config(page_title="KNSB Rocket Simulator & Designer", layout="wide")
-st.title("🚀 KNSB Solid Fuel Rocket Design & Flight Simulator")
+# --- 1. 페이지 설정 (최상단에 한 번만!) ---
+st.set_page_config(
+    page_title="KNSB Rocket Simulator",
+    page_icon="🚀",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# --- 2. 메인 화면: 인트로 섹션 (버전 정보 및 프로젝트 개요) ---
+# 버튼을 누르기 전(결과가 나오기 전)에 보여줄 초기 화면입니다.
+def show_welcome_page():
+    st.title("🚀 KNSB Solid Fuel Rocket Design & Flight Simulator")
+    
+    # 상단 3개 카드 레이아웃
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.info("### 🧪 Internal Ballistics\nBATES 그레인 형상 및 추진제 연소 특성을 기반으로 한 정밀한 챔버 압력 예측")
+    with col2:
+        st.success("### 🛰️ 1-DOF Simulation\nISA 표준 대기 모델과 RK45 솔버를 결합한 해석")
+    with col3:
+        st.warning("### 📊 Engineering Report\n입력 변수부터 시계열 데이터까지 원클릭 Excel 리포트 생성 및 추출")
+
+    st.markdown("---")
+    
+    # 중간 상세 설명 섹션
+    m_col1, m_col2 = st.columns([1.5, 1])
+    with m_col1:
+        st.subheader("📌 System Overview")
+        st.markdown("""
+        본 시뮬레이터는 **KNSB 고체 추진제** 로켓의 설계부터 비행 고도 예측까지의 전 과정을 수치해석적으로 모델링합니다. 
+        왼쪽 사이드바에서 설계 파라미터를 입력하고 **Run Simulation** 버튼을 눌러 시뮬레이션을 시작하세요.
+        
+        * **OOP Architecture:** 물리 모델과 UI의 철저한 분리.
+        * **Physics-Based:** Saint-Robert's Law ($r = aP_c^n$) 기반 연소 모델.
+        * **Professional Specs:** 노즐 팽창비 및 최적 그레인 치수 자동 산출.
+        """)
+        
+    with m_col2:
+        st.subheader("📝 Physics Engine")
+        # 수식 표시 (LaTeX 활용)
+        st.latex(r"r = a \cdot P_c^n")
+        st.latex(r"P_c = \left( \frac{a \rho_p A_b}{C_d A_t} \right)^{\frac{1}{1-n}}")
+        st.caption("Theoretical Chamber Pressure Balance Equation")
+
+# --- 푸터 함수 정의 ---
+def show_footer():
+    st.markdown("---")
+    st.markdown(
+        """
+        <div style="text-align: center; padding: 40px 0px 20px 0px; color: #64748b;">
+            <p style="font-size: 14px; letter-spacing: 1px; margin-bottom: 10px;">
+                © 2026 KNSB Rocket Project
+            </p>
+            <p style="font-size: 18px; font-weight: 700; color: #3b82f6;">
+                KARS2026 | Propulsion Team Leader | PARK SEONG-JAE
+            </p>
+            <div style="margin-top: 15px; font-family: monospace; font-size: 13px;">
+                Mechatronics Engineering & Control Systems Focus
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # --- Sidebar: 모든 설계 파라미터 입력 ---
 with st.sidebar:
@@ -54,7 +115,9 @@ with st.sidebar:
 
     run_button = st.button("Run Simulation & Design", type="primary", use_container_width=True)
 
-if run_button:
+if not run_button:
+    show_welcome_page()
+else:
     # 1. 시뮬레이션 계산 엔진 가동
     optimizer = FlightOptimizer(spec, design)
     F_req = optimizer.find_required_thrust(h_target)
@@ -206,3 +269,6 @@ if run_button:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True
     )
+
+# 시뮬레이션 결과 화면 하단에 푸터 표시
+show_footer()
