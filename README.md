@@ -19,14 +19,11 @@
 
 프로젝트는 유지보수와 모듈화를 위해 5개의 핵심 파이썬 파일로 구성되어 있습니다.
 
-text
-'''
 ├── app.py         # Streamlit UI 렌더링, 사용자 입력 처리 및 컨트롤러 역할
 ├── config.py      # 물리 상수(Constants) 및 Dataclass 기반 설계/추진제 모델 정의
 ├── engine.py      # SolidMotor 클래스: 노즐 팽창비 계산 및 그레인 형상 기반 내탄도학 시뮬레이션
 ├── flight.py      # RocketFlightSim & FlightOptimizer 클래스: 운동 방정식(EOM) 적분 및 필요 추력 탐색
 └── physics.py     # ISA 표준 대기 모델 및 루트 파인딩(Mach Number 계산) 등 순수 수학/물리 유틸리티
-'''
 
 ⚙️ Installation
 본 프로그램을 실행하기 위해서는 Python 3.9 이상의 환경이 권장됩니다.
